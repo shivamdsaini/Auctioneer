@@ -1,4 +1,6 @@
-// ignore_for_file: prefer_const_constructors, unnecessary_string_interpolations, no_logic_in_create_state, use_key_in_widget_constructors, must_be_immutable, avoid_unnecessary_containers, unnecessary_cast, unused_local_variable
+// ignore_for_file: prefer_const_constructors, unnecessary_string_interpolations, no_logic_in_create_state, use_key_in_widget_constructors, must_be_immutable, avoid_unnecessary_containers, unnecessary_cast, unused_local_variable, avoid_print, unused_field
+
+import 'dart:async';
 
 import 'package:auctioneer/pages/create_post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,18 +16,33 @@ class Bidingplace extends StatefulWidget {
   State<Bidingplace> createState() => _BidingplaceState(user: user);
 }
 
-
 class _BidingplaceState extends State<Bidingplace> {
-  
+  final bider = u.FirebaseAuth.instance.currentUser!;
 
-   final bider = u.FirebaseAuth.instance.currentUser!;
-   
   User user;
   _BidingplaceState({required this.user});
+  late Timer _everySecond;
 
+  @override
+  void initState() {
+    super.initState();
+    _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
+      setState(() {
+        final docRef =
+            FirebaseFirestore.instance.collection("Users").doc('${user.id}');
+        docRef.get().then(
+          (DocumentSnapshot doc) {
+            //  user.bidprice = doc.data() as Map<String, dynamic>;
+            user = User.fromJson(doc.data() as Map<String, dynamic>);
+          },
+          onError: (e) => print("Error getting document: $e"),
+        );
+      });
+    });
+  }
 
-  late int bidprice=user.bidprice ;
-  
+  late int bidprice = user.bidprice;
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -222,12 +239,17 @@ class _BidingplaceState extends State<Bidingplace> {
                                             padding: EdgeInsets.all(10),
                                             width: size.width,
                                             height: 55,
-                                            child: Text(
-                                              'Seller: ${user.seller}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                                fontSize: 20,
+                                            child: Flexible(
+                                              child: RichText(
+                                                overflow: TextOverflow.ellipsis,
+                                                text: TextSpan(
+                                                  text: 'Seller: ${user.seller}',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           )),
@@ -238,12 +260,15 @@ class _BidingplaceState extends State<Bidingplace> {
                                             padding: EdgeInsets.all(10),
                                             width: size.width,
                                             height: 55,
-                                            child: Text(
-                                              'Bidder: ${user.bidder}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                                fontSize: 20,
+                                            child: RichText(
+                                              overflow: TextOverflow.ellipsis,
+                                              text: TextSpan(
+                                                text: 'Bidder: ${user.bidder}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  fontSize: 20,
+                                                ),
                                               ),
                                             ),
                                           )),
@@ -259,7 +284,6 @@ class _BidingplaceState extends State<Bidingplace> {
               ),
             ),
             // SizedBox(height: 500,),
-            
           ],
         ),
       ),
@@ -267,31 +291,32 @@ class _BidingplaceState extends State<Bidingplace> {
         elevation: 0,
         color: Colors.black,
         child: Container(
-          child:
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  
-                  mainAxisAlignment: MainAxisAlignment.center, 
-                children: [
-            ElevatedButton(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              ElevatedButton(
                   onPressed: () {
-                    final docUser=FirebaseFirestore.instance.collection('Users').doc('${user.id}');
-                    bidprice+=100;
+                    bidprice += 100;
+
+                    final docUser = FirebaseFirestore.instance
+                        .collection('Users')
+                        .doc('${user.id}');
                     docUser.update({
-                      'bidprice':bidprice,
-                      'bidder':bider.email,
+                      'bidprice': bidprice,
+                      'bidder': bider.email,
                     });
-                    setState(() { user.bidprice = bidprice;
-                    user.bidder=bider.email!;});
+
+                    setState(() {
+                      user.bidprice = bidprice;
+                      user.bidder = bider.email!;
+                    });
                   },
-                  
                   style: ElevatedButton.styleFrom(
                     shadowColor: Colors.red,
                     elevation: 20,
                     primary: Color.fromARGB(255, 189, 55, 100),
-                     onPrimary: Colors.grey,
-                   ),
+                    onPrimary: Colors.grey,
+                  ),
                   child: const Text(
                     '₹100',
                     style: TextStyle(
@@ -300,26 +325,30 @@ class _BidingplaceState extends State<Bidingplace> {
                       fontSize: 20,
                     ),
                   )),
-            SizedBox(
+              SizedBox(
                 width: 20,
-            ),
-            ElevatedButton(onPressed: () {
-              final docUser=FirebaseFirestore.instance.collection('Users').doc('${user.id}');
-                    bidprice+=500;
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    final docUser = FirebaseFirestore.instance
+                        .collection('Users')
+                        .doc('${user.id}');
+                    bidprice += 500;
                     docUser.update({
-                      'bidprice':bidprice,
-                      'bidder':bider.email,
+                      'bidprice': bidprice,
+                      'bidder': bider.email,
                     });
-                    setState(() { user.bidprice = bidprice;
-                    user.bidder=bider.email!;});
-            },
-                 
+                    setState(() {
+                      user.bidprice = bidprice;
+                      user.bidder = bider.email!;
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     shadowColor: Colors.red,
                     elevation: 20,
                     primary: Color.fromARGB(255, 189, 55, 100),
-                     onPrimary: Colors.grey,
-                   ),
+                    onPrimary: Colors.grey,
+                  ),
                   child: const Text(
                     '₹500',
                     style: TextStyle(
@@ -328,27 +357,30 @@ class _BidingplaceState extends State<Bidingplace> {
                       fontSize: 20,
                     ),
                   )),
-            SizedBox(
+              SizedBox(
                 width: 20,
-            ),
-            ElevatedButton(onPressed: () {
-              final docUser=FirebaseFirestore.instance.collection('Users').doc('${user.id}');
-                    bidprice+=1000;
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    final docUser = FirebaseFirestore.instance
+                        .collection('Users')
+                        .doc('${user.id}');
+                    bidprice += 1000;
                     docUser.update({
-                      'bidprice':bidprice,
-                     'bidder':bider.email,
+                      'bidprice': bidprice,
+                      'bidder': bider.email,
                     });
-                    setState(() { user.bidprice = bidprice;
-                    user.bidder=bider.email!;});
-            },
-              
-                  
+                    setState(() {
+                      user.bidprice = bidprice;
+                      user.bidder = bider.email!;
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     shadowColor: Colors.red,
                     elevation: 20,
                     primary: Color.fromARGB(255, 189, 55, 100),
                     onPrimary: Colors.grey,
-                   ),
+                  ),
                   child: const Text(
                     '₹1000',
                     style: TextStyle(
@@ -357,10 +389,16 @@ class _BidingplaceState extends State<Bidingplace> {
                       fontSize: 20,
                     ),
                   )),
-          ]),
-              ),
+            ]),
+          ),
         ),
       ),
     );
   }
 }
+
+// Stream<user>.periodic(const Duration(seconds: 1),{
+//               final docUser=FirebaseFirestore.instance.collection('Users').doc('${user.id}');
+//                user.bidprice=docUser.bidprice;
+//                user.bider=docUser.bider;
+//       }  )
