@@ -14,39 +14,41 @@ class ActiveBids extends StatefulWidget {
 class _ActiveBidsState extends State<ActiveBids> {
   @override
   Widget build(BuildContext context) {
+    //  Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text('Active Bids'),
-         backgroundColor: Color(0xFF121212),
-         elevation: 0,
+        backgroundColor: Color(0xFF121212),
+        elevation: 0,
       ),
-       backgroundColor: Color(0xFF121212),
+      backgroundColor: Color(0xFF121212),
       body: SingleChildScrollView(
         physics: ClampingScrollPhysics(),
         scrollDirection: Axis.vertical,
         child: StreamBuilder<List<User>>(
-           stream: readUsers(),
-           builder: (context ,snapshot){
-            if(snapshot.hasError){
+          stream: readUsers(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
               return Text('Something went wrong!');
-            }else if(snapshot.hasData){
-              final users=snapshot.data!;
+            } else if (snapshot.hasData) {
+              final users = snapshot.data!;
               return SingleChildScrollView(
                 child: ListView(
-                shrinkWrap: true,
-                physics: ClampingScrollPhysics(),
-                 
-                  children:users.map(buildUserCurr).toList(),
-                  
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  children: users.map(buildUserCurr).toList(),
                 ),
               );
-            }else{
+            } else {
               return Padding(
                 padding: const EdgeInsets.only(top: 290),
-                child: Center(child: CircularProgressIndicator(color: Colors.white,)),
+                child: Center(
+                    child: CircularProgressIndicator(
+                  color: Colors.white,
+                )),
               );
             }
-           },
+          },
         ),
       ),
     );
