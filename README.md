@@ -1,6 +1,8 @@
-# auctioneer
+                                              ![alt text](https://user-images.githubusercontent.com/97328408/178457363-aa807db7-ab45-4ba7-ab52-d4da4a021c4a.png)
 
-A new Flutter project.
+# Auctioneer
+
+An app-based online platform where items can be listed for auction and users can bid on items which are under auction. Bidding on any auction starts on the date and time fixed by the seller and ends after 30 mins duration
 
 ## Getting Started
 
